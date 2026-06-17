@@ -1,0 +1,25 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2026-05-14 13:00:00`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"Read-only GraphQL access for the Keanggotaan member service."
+type Query {
+    "List all members so clients can choose only the fields they need."
+    members: [Member!]! @all(model: "App\\Models\\Member")
+
+    "Find one member by ID for loan-service validation."
+    member(id: ID! @eq): Member @find(model: "App\\Models\\Member")
+}
+
+"Library membership profile."
+type Member {
+    id: ID!
+    name: String!
+    student_number: String!
+    email: String!
+    phone: String
+    address: String
+    status: String!
+    is_active: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+}

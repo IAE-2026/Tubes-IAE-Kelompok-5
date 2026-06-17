@@ -1,0 +1,67 @@
+services:
+  mysql-member:
+    image: mysql:8.4
+    container_name: tubes-iae-mysql-member
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: tubes_iae_keanggotaan
+      MYSQL_USER: iae_user
+      MYSQL_PASSWORD: iae_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - iae-network
+
+  member-service:
+    build:
+      context: .
+    container_name: tubes-iae-member-service
+    restart: unless-stopped
+    depends_on:
+      mysql-member:
+        condition: service_healthy
+    environment:
+      APP_NAME: "Keanggotaan Service"
+      APP_ENV: local
+      APP_KEY: "base64:90V3xrTclpleS+ld6kFp89LvZ8X3pypeonxu/pmT+70="
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8001"
+      IAE_API_KEY: "102022400255"
+      L5_SWAGGER_GENERATE_ALWAYS: "true"
+      GRAPHIQL_ENABLED: "true"
+      LIGHTHOUSE_SCHEMA_CACHE_ENABLE: "false"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql-member
+      DB_PORT: 3306
+      DB_DATABASE: tubes_iae_keanggotaan
+      DB_USERNAME: iae_user
+      DB_PASSWORD: iae_password
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/var/www/html
+      - member_vendor:/var/www/html/vendor
+    networks:
+      - iae-network
+
+networks:
+  iae-network:
+    external: true
+    name: tubes-iae-network
+
+volumes:
+  mysql_data:
+  member_vendor:
