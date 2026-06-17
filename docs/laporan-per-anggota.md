@@ -2,7 +2,7 @@
 
 Dokumen ini menjelaskan file yang diubah atau ditambahkan pada patch integrasi Tugas Besar, dikelompokkan berdasarkan anggota dan bagian integrasi kelompok.
 
-Commit acuan: `ace3c0e` - `Patch Tubes integration requirements`
+Commit acuan integrasi awal: `ace3c0e` - `Patch Tubes integration requirements`
 
 ## Faris Fadil Arifin - Member Service
 
@@ -47,10 +47,13 @@ Folder service: `Katalog-Buku-Service-Dewinda`
 | Diubah | `Katalog-Buku-Service-Dewinda/app/Services/SOAPAuditService.php` | Mengubah base URL SOAP agar configurable lewat `SSO_URL`. |
 | Diubah | `Katalog-Buku-Service-Dewinda/app/Services/SSOService.php` | Mengubah `SSO_URL`, `SSO_EMAIL`, dan `SSO_PASSWORD` agar configurable lewat environment. |
 | Diubah | `Katalog-Buku-Service-Dewinda/phpunit.xml` | Menambahkan environment testing untuk `APP_KEY`, `IAE_API_KEY`, `IAE_TEAM_ID`, dan `SSO_URL`. |
+| Diubah | `Katalog-Buku-Service-Dewinda/composer.lock` | Menyesuaikan versi dependency agar kompatibel dengan PHP 8.3 lokal. Sebelumnya lockfile memakai beberapa package Symfony v8 yang membutuhkan PHP >=8.4. |
 
 ### Ringkasan
 
 Perubahan pada service Dewinda membuat Katalog Service mendukung proses bisnis peminjaman secara langsung. Service ini tidak hanya menyediakan data buku, tetapi juga menjadi sumber kebenaran untuk ketersediaan stok buku.
+
+Update pengujian: PHPUnit Katalog Service sudah berhasil dijalankan di PHP 8.3 setelah `composer.lock` disesuaikan. Hasil: 2 test lulus dengan 2 assertion.
 
 ## Integrasi Kelompok 5
 
@@ -79,5 +82,5 @@ Perubahan integrasi kelompok memastikan repository memenuhi luaran Tugas Besar: 
 | Syntax PHP file yang diubah | Lulus |
 | PHPUnit Member Service | Lulus dengan warning dependency |
 | PHPUnit Peminjaman Service | Lulus dengan warning dependency |
-| PHPUnit Katalog Service | Belum bisa dijalankan lokal karena lockfile membutuhkan PHP `>=8.4`, sedangkan mesin lokal memakai PHP `8.3.16` |
+| PHPUnit Katalog Service | Lulus setelah `composer.lock` Katalog disesuaikan agar kompatibel dengan PHP `8.3.16` |
 | Docker build/run | Belum bisa dijalankan karena Docker Desktop Linux engine belum aktif |
