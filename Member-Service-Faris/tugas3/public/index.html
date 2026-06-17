@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tugas 3 Digital City</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <h1>Digital City Permit Payment</h1>
+          <p>TEAM-38 · Tugas 3 Individual Integration</p>
+        </div>
+        <div id="status" class="status">Idle</div>
+      </section>
+
+      <section class="grid">
+        <form id="loginForm" class="panel">
+          <h2>SSO Login</h2>
+          <label>
+            Email
+            <input id="email" name="email" type="email" value="warga38@ktp.iae.id" autocomplete="username">
+          </label>
+          <label>
+            Password
+            <input id="password" name="password" type="password" autocomplete="current-password">
+          </label>
+          <button type="submit">Login</button>
+          <pre id="meOutput"></pre>
+        </form>
+
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Permit Invoice</h2>
+            <button id="loadPermits" type="button">Load</button>
+          </div>
+          <div id="permits"></div>
+        </section>
+      </section>
+
+      <section class="panel">
+        <h2>Integration Result</h2>
+        <pre id="result">{}</pre>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

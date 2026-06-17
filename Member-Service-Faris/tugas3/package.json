@@ -1,0 +1,15 @@
+{
+  "name": "tugas-3-enterprise-digital-city",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dependency-free Node.js implementation for IAE Tugas 3 individual integration service.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "smoke": "node scripts/live-smoke.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

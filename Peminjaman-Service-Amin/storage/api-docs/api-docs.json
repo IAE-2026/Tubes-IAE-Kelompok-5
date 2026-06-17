@@ -1,0 +1,172 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Service Peminjaman API",
+        "description": "Dokumentasi layanan peminjaman buku untuk Tugas 2 IAE",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/loans": {
+            "get": {
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Ambil semua transaksi peminjaman",
+                "operationId": "11067bb9b862fd7effd5a9394c6aa29e",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Token (JWT) dari SSO Warga",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "Bearer <token>"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data retrieved successfully"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Buat transaksi peminjaman baru",
+                "operationId": "67746018747d878b72f133d469781040",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Token (JWT) dari SSO Warga",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "Bearer <token>"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "member_id",
+                                    "book_id"
+                                ],
+                                "properties": {
+                                    "member_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "book_id": {
+                                        "type": "integer",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data created successfully"
+                    }
+                }
+            }
+        },
+        "/api/v1/loans/{id}": {
+            "get": {
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Ambil detail satu transaksi",
+                "operationId": "93e76696ff0b06ec950dd75e35c89c1b",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Token (JWT) dari SSO Warga",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "Bearer <token>"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Transaksi Peminjaman",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/loans/{id}/return": {
+            "post": {
+                "tags": [
+                    "Loans"
+                ],
+                "summary": "Proses pengembalian buku",
+                "operationId": "2e6a11e9ff54d0caf7c65d4173719a98",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Token (JWT) dari SSO Warga",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "Bearer <token>"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Transaksi Peminjaman",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Book returned successfully"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Loans",
+            "description": "Loans"
+        }
+    ]
+}

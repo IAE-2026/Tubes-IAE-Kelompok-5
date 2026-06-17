@@ -1,0 +1,195 @@
+services:
+  api-gateway:
+    image: nginx:1.27-alpine
+    container_name: tubes-iae-kel5-api-gateway
+    restart: unless-stopped
+    depends_on:
+      - member-service
+      - peminjaman-service
+      - katalog-buku-service
+    ports:
+      - "8080:80"
+    volumes:
+      - ./api-gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - iae-network
+
+  member-service:
+    build:
+      context: ./Member-Service-Faris
+    container_name: tubes-iae-kel5-member-service
+    restart: unless-stopped
+    depends_on:
+      mysql-member:
+        condition: service_healthy
+    environment:
+      APP_NAME: "Keanggotaan Service"
+      APP_ENV: local
+      APP_KEY: "base64:OU7pg1SEOjPxvmA9meGixWH4vlyfZVZWlxFxgHepE00="
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8001"
+      IAE_API_KEY: "102022400255"
+      L5_SWAGGER_GENERATE_ALWAYS: "true"
+      GRAPHIQL_ENABLED: "true"
+      LIGHTHOUSE_SCHEMA_CACHE_ENABLE: "false"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql-member
+      DB_PORT: 3306
+      DB_DATABASE: tubes_iae_keanggotaan
+      DB_USERNAME: iae_user
+      DB_PASSWORD: iae_password
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./Member-Service-Faris:/var/www/html
+      - member_vendor:/var/www/html/vendor
+    networks:
+      - iae-network
+
+  mysql-member:
+    image: mysql:8.4
+    container_name: tubes-iae-kel5-mysql-member
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: tubes_iae_keanggotaan
+      MYSQL_USER: iae_user
+      MYSQL_PASSWORD: iae_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_member_data:/var/lib/mysql
+      - ./Member-Service-Faris/docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - iae-network
+
+  peminjaman-service:
+    build:
+      context: ./Peminjaman-Service-Amin
+    container_name: tubes-iae-kel5-peminjaman-service
+    restart: unless-stopped
+    depends_on:
+      mysql-peminjaman:
+        condition: service_healthy
+    environment:
+      APP_NAME: peminjaman-service
+      APP_ENV: local
+      APP_KEY: "base64:TSpbPOJlerDCDNKMVPZkwE4w3uWc0nBp/fDMa3TRkYw="
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8003"
+      API_KEY: "102022400110"
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+      DB_CONNECTION: mysql
+      DB_HOST: mysql-peminjaman
+      DB_PORT: 3306
+      DB_DATABASE: peminjaman_service
+      DB_USERNAME: laravel
+      DB_PASSWORD: secret
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./Peminjaman-Service-Amin:/var/www
+      - peminjaman_vendor:/var/www/vendor
+    networks:
+      - iae-network
+
+  mysql-peminjaman:
+    image: mysql:8.0
+    container_name: tubes-iae-kel5-mysql-peminjaman
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: peminjaman_service
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_peminjaman_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootsecret"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    networks:
+      - iae-network
+
+  katalog-buku-service:
+    build:
+      context: ./Katalog-Buku-Service-Dewinda
+    container_name: tubes-iae-kel5-katalog-buku-service
+    restart: unless-stopped
+    depends_on:
+      mysql-katalog:
+        condition: service_healthy
+    environment:
+      APP_NAME: katalog-service
+      APP_ENV: local
+      APP_KEY: "base64:fKd7F0+DPr8RZ+q1p63EO+Y7ZOZE/mcEknrBWQtSGY4="
+      APP_DEBUG: "true"
+      APP_URL: "http://localhost:8002"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql-katalog
+      DB_PORT: 3306
+      DB_DATABASE: katalog_buku
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      IAE_API_KEY: "KEY-MHS-44"
+      IAE_TEAM_ID: "TEAM-05"
+      SSO_EMAIL: "warga05@ktp.iae.id"
+      SSO_PASSWORD: "KtpDigital2026!"
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./Katalog-Buku-Service-Dewinda:/var/www
+      - katalog_vendor:/var/www/vendor
+    networks:
+      - iae-network
+
+  mysql-katalog:
+    image: mysql:8.0
+    container_name: tubes-iae-kel5-mysql-katalog
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: katalog_buku
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_katalog_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - iae-network
+
+networks:
+  iae-network:
+    name: tubes-iae-network
+    driver: bridge
+
+volumes:
+  member_vendor:
+  peminjaman_vendor:
+  katalog_vendor:
+  mysql_member_data:
+  mysql_peminjaman_data:
+  mysql_katalog_data:
