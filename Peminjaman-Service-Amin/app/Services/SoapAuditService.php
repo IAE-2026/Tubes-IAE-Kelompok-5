@@ -22,7 +22,7 @@ class SoapAuditService
      */
     public function sendAudit(string $activityName, array $data, string $bearerToken): ?string
     {
-        // Transformasi data JSON → XML CDATA
+        // Transformasi data JSON ke XML CDATA.
         $logContent = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $xmlEnvelope = <<<XML

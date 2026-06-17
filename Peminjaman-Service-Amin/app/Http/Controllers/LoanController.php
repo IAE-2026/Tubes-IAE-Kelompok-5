@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Loan;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Info(
@@ -127,6 +129,55 @@ class LoanController extends Controller
             'book_id' => 'required|integer',
         ]);
 
+        $memberResult = $this->fetchMember((int) $request->member_id);
+
+        if (! $memberResult['ok']) {
+            return $this->formatResponse(
+                'error',
+                $memberResult['message'],
+                $memberResult['data'],
+                $memberResult['code']
+            );
+        }
+
+        $member = $memberResult['data'];
+        if (($member['is_active'] ?? false) !== true || ($member['status'] ?? null) !== 'active') {
+            return $this->formatResponse('error', 'Member is not active', [
+                'member_id' => (int) $request->member_id,
+                'member_status' => $member['status'] ?? null,
+            ], 422);
+        }
+
+        $bookResult = $this->fetchBook((int) $request->book_id, $request->bearerToken());
+
+        if (! $bookResult['ok']) {
+            return $this->formatResponse(
+                'error',
+                $bookResult['message'],
+                $bookResult['data'],
+                $bookResult['code']
+            );
+        }
+
+        $book = $bookResult['data'];
+        if ((int) ($book['available_stock'] ?? 0) < 1) {
+            return $this->formatResponse('error', 'Book stock is not available', [
+                'book_id' => (int) $request->book_id,
+                'available_stock' => (int) ($book['available_stock'] ?? 0),
+            ], 422);
+        }
+
+        $stockResult = $this->postCatalogStockAction((int) $request->book_id, 'borrow', $request->bearerToken());
+
+        if (! $stockResult['ok']) {
+            return $this->formatResponse(
+                'error',
+                $stockResult['message'],
+                $stockResult['data'],
+                $stockResult['code']
+            );
+        }
+
         $loan = Loan::create([
             'member_id' => $request->member_id,
             'book_id' => $request->book_id,
@@ -134,7 +185,20 @@ class LoanController extends Controller
             'status' => 'active'
         ]);
 
-        return $this->formatResponse('success', 'Data created successfully', $loan, 201);
+        return $this->formatResponse('success', 'Data created successfully', [
+            'loan' => $loan,
+            'validated_member' => [
+                'id' => $member['id'] ?? $request->member_id,
+                'status' => $member['status'] ?? null,
+                'is_active' => $member['is_active'] ?? null,
+            ],
+            'validated_book' => [
+                'id' => $book['id'] ?? $request->book_id,
+                'title' => $book['title'] ?? null,
+                'available_stock_before' => (int) ($book['available_stock'] ?? 0),
+                'available_stock_after' => $stockResult['data']['available_stock'] ?? null,
+            ],
+        ], 201);
     }
 
     /**
@@ -172,6 +236,17 @@ class LoanController extends Controller
             return $this->formatResponse('error', 'Book is already returned', null, 400);
         }
 
+        $stockResult = $this->postCatalogStockAction((int) $loan->book_id, 'return', $request->bearerToken());
+
+        if (! $stockResult['ok']) {
+            return $this->formatResponse(
+                'error',
+                $stockResult['message'],
+                $stockResult['data'],
+                $stockResult['code']
+            );
+        }
+
         $loan->update([
             'return_date' => now()->format('Y-m-d'),
             'status' => 'returned'
@@ -181,11 +256,14 @@ class LoanController extends Controller
         // Fetch M2M Bearer Token using the API_KEY
         $m2mToken = \Illuminate\Support\Facades\Cache::remember('sso_m2m_token', 3000, function () {
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(10)->post(env('SSO_URL') . '/api/v1/auth/token', [
-                    'api_key' => env('API_KEY'),
-                ]);
+                $response = \Illuminate\Support\Facades\Http::asForm()
+                    ->acceptJson()
+                    ->timeout(10)
+                    ->post(env('SSO_URL', 'https://iae-sso.virtualfri.id') . '/api/v1/auth/token', [
+                        'api_key' => env('API_KEY'),
+                    ]);
                 if ($response->successful()) {
-                    return $response->json('token');
+                    return $response->json('token') ?? $response->json('access_token');
                 }
                 \Illuminate\Support\Facades\Log::error('Failed to fetch M2M token: ' . $response->body());
                 return null;
@@ -220,6 +298,171 @@ class LoanController extends Controller
             $amqpService->publish('library.loan.returned', $loan, $m2mToken);
         }
 
-        return $this->formatResponse('success', 'Book returned successfully', $loan, 200);
+        return $this->formatResponse('success', 'Book returned successfully', [
+            'loan' => $loan->fresh(),
+            'catalog_stock' => $stockResult['data'],
+            'audit' => [
+                'receipt_number' => $receiptNumber,
+                'soap_audit_attempted' => (bool) $m2mToken,
+                'rabbitmq_publish_attempted' => (bool) $m2mToken,
+            ],
+        ], 200);
+    }
+
+    private function fetchMember(int $memberId): array
+    {
+        $baseUrl = rtrim(env('MEMBER_SERVICE_URL', 'http://member-service:8000'), '/');
+        $apiKey = env('MEMBER_SERVICE_API_KEY', '102022400255');
+
+        try {
+            $response = Http::acceptJson()
+                ->withHeaders(['X-IAE-KEY' => $apiKey])
+                ->timeout(10)
+                ->get("{$baseUrl}/api/v1/members/{$memberId}");
+
+            if ($response->status() === 404) {
+                return [
+                    'ok' => false,
+                    'message' => 'Member not found in member service',
+                    'data' => ['member_id' => $memberId],
+                    'code' => 404,
+                ];
+            }
+
+            if (! $response->successful()) {
+                return [
+                    'ok' => false,
+                    'message' => 'Member service validation failed',
+                    'data' => [
+                        'member_id' => $memberId,
+                        'member_service_status' => $response->status(),
+                        'member_service_body' => $response->json() ?? $response->body(),
+                    ],
+                    'code' => 502,
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'message' => 'Member validated',
+                'data' => $response->json('data') ?? [],
+                'code' => 200,
+            ];
+        } catch (\Throwable $e) {
+            Log::warning('Member service validation exception: ' . $e->getMessage());
+
+            return [
+                'ok' => false,
+                'message' => 'Member service is unreachable',
+                'data' => ['member_id' => $memberId],
+                'code' => 502,
+            ];
+        }
+    }
+
+    private function fetchBook(int $bookId, ?string $bearerToken): array
+    {
+        $baseUrl = rtrim(env('CATALOG_SERVICE_URL', 'http://katalog-buku-service:8000'), '/');
+        $apiKey = env('CATALOG_SERVICE_API_KEY', 'KEY-MHS-44');
+
+        try {
+            $request = Http::acceptJson()
+                ->withHeaders(['X-IAE-KEY' => $apiKey])
+                ->timeout(10);
+
+            if ($bearerToken) {
+                $request = $request->withToken($bearerToken);
+            }
+
+            $response = $request->get("{$baseUrl}/api/v1/books/{$bookId}");
+
+            if ($response->status() === 404) {
+                return [
+                    'ok' => false,
+                    'message' => 'Book not found in catalog service',
+                    'data' => ['book_id' => $bookId],
+                    'code' => 404,
+                ];
+            }
+
+            if (! $response->successful()) {
+                return [
+                    'ok' => false,
+                    'message' => 'Catalog service validation failed',
+                    'data' => [
+                        'book_id' => $bookId,
+                        'catalog_service_status' => $response->status(),
+                        'catalog_service_body' => $response->json() ?? $response->body(),
+                    ],
+                    'code' => 502,
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'message' => 'Book validated',
+                'data' => $response->json('data') ?? [],
+                'code' => 200,
+            ];
+        } catch (\Throwable $e) {
+            Log::warning('Catalog service validation exception: ' . $e->getMessage());
+
+            return [
+                'ok' => false,
+                'message' => 'Catalog service is unreachable',
+                'data' => ['book_id' => $bookId],
+                'code' => 502,
+            ];
+        }
+    }
+
+    private function postCatalogStockAction(int $bookId, string $action, ?string $bearerToken): array
+    {
+        $baseUrl = rtrim(env('CATALOG_SERVICE_URL', 'http://katalog-buku-service:8000'), '/');
+        $apiKey = env('CATALOG_SERVICE_API_KEY', 'KEY-MHS-44');
+
+        try {
+            $request = Http::acceptJson()
+                ->withHeaders(['X-IAE-KEY' => $apiKey])
+                ->timeout(10);
+
+            if ($bearerToken) {
+                $request = $request->withToken($bearerToken);
+            }
+
+            $response = $request->post("{$baseUrl}/api/v1/books/{$bookId}/stock/{$action}");
+
+            if (! $response->successful()) {
+                return [
+                    'ok' => false,
+                    'message' => "Catalog stock {$action} failed",
+                    'data' => [
+                        'book_id' => $bookId,
+                        'catalog_service_status' => $response->status(),
+                        'catalog_service_body' => $response->json() ?? $response->body(),
+                    ],
+                    'code' => $response->status() === 404 ? 404 : 502,
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'message' => "Catalog stock {$action} succeeded",
+                'data' => $response->json('data') ?? [],
+                'code' => 200,
+            ];
+        } catch (\Throwable $e) {
+            Log::warning("Catalog stock {$action} exception: " . $e->getMessage());
+
+            return [
+                'ok' => false,
+                'message' => 'Catalog stock service is unreachable',
+                'data' => [
+                    'book_id' => $bookId,
+                    'action' => $action,
+                ],
+                'code' => 502,
+            ];
+        }
     }
 }
