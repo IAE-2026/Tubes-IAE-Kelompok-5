@@ -1,0 +1,366 @@
+{
+  "info": {
+    "_postman_id": "1ed4aa33-4a6f-494b-93f1-6d86c6e3b787",
+    "name": "Tubes IAE Kelompok 5",
+    "description": "Collection untuk menguji API Gateway Kelompok 5. Jalankan setelah `docker compose up --build`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Member Service",
+      "item": [
+        {
+          "name": "Get Members",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{member_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "members"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Member Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{member_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/members/{{member_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "members",
+                "{{member_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{member_api_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Faris Fadil Arifin\",\n  \"student_number\": \"{{student_number}}\",\n  \"email\": \"{{member_email}}\",\n  \"phone\": \"081234567890\",\n  \"address\": \"Bandung\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "members"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GraphQL Members",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{member_api_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { members { id name student_number email status is_active } }\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Katalog Buku Service",
+      "item": [
+        {
+          "name": "Get Books",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{catalog_api_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/books",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "books"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Book Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{catalog_api_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/books/{{book_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "books",
+                "{{book_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrow Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{catalog_api_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/books/{{book_id}}/stock/borrow",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "books",
+                "{{book_id}}",
+                "stock",
+                "borrow"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Return Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-IAE-KEY",
+                "value": "{{catalog_api_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/books/{{book_id}}/stock/return",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "books",
+                "{{book_id}}",
+                "stock",
+                "return"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Peminjaman Service",
+      "item": [
+        {
+          "name": "Get Loans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/loans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "loans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Loan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"member_id\": {{member_id}},\n  \"book_id\": {{book_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/loans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "loans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Return Loan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/loans/{{loan_id}}/return",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "loans",
+                "{{loan_id}}",
+                "return"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ]
+}
