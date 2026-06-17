@@ -29,11 +29,26 @@ File:
 
 ## Status Runtime
 
-Postman runtime belum dijalankan karena Docker Desktop Linux engine belum aktif pada mesin lokal. Collection sudah bisa diimport, tetapi request akan berhasil hanya setelah gateway berjalan dengan:
+Postman collection sudah siap dijalankan setelah gateway aktif. Pada test lokal, gateway berhasil berjalan dan endpoint health mengembalikan status OK.
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
+
+Smoke test:
+
+```bash
+GET http://localhost:8080/health
+GET http://localhost:8080/api/v1/members
+```
+
+Hasil:
+
+```json
+{"status":"ok"}
+```
+
+Member endpoint juga berhasil lewat gateway dengan header `X-IAE-KEY: 102022400255` dan status HTTP 200.
 
 ## Catatan Auth
 

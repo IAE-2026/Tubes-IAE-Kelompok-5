@@ -46,6 +46,12 @@ services:
     volumes:
       - ./Member-Service-Faris:/var/www/html
       - member_vendor:/var/www/html/vendor
+    command: >
+      sh -c "find vendor -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+      && cp -a /opt/vendor/. vendor/
+      && php artisan config:clear
+      && php artisan migrate --force
+      && php artisan serve --host=0.0.0.0 --port=8000"
     networks:
       - iae-network
 
