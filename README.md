@@ -50,3 +50,5 @@ Dokumen pendukung:
 - `docs/tubes-compliance-report.md`
 - `docs/kontribusi-tim.md`
 - `docs/log-prompting-ai.md`
+- `docs/laporan-per-anggota.md`
+- `docs/test-report.md`
