@@ -1,0 +1,420 @@
+{
+  "info": {
+    "_postman_id": "2a7db944-6b08-40df-ac33-192b46e85f0b",
+    "name": "Tubes IAE Kelompok 5",
+    "description": "Collection untuk menguji gateway dan alur end-to-end Peminjaman Buku Kelompok 5.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.environment.get('unique_suffix') || pm.environment.get('unique_suffix') === 'manual') {",
+          "  pm.environment.set('unique_suffix', Date.now().toString());",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Gateway Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Gateway health returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Gateway health status is ok', function () {",
+              "  pm.expect(pm.response.json().status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 Login SSO User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "email",
+              "value": "{{sso_email}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{sso_password}}",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{sso_url}}/api/v1/auth/token",
+          "host": ["{{sso_url}}"],
+          "path": ["api", "v1", "auth", "token"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('SSO login returns 2xx', function () {",
+              "  pm.expect(pm.response.code).to.be.within(200, 299);",
+              "});",
+              "const json = pm.response.json();",
+              "const token = json.token || json.access_token || json.data?.token || json.data?.access_token;",
+              "pm.test('SSO token exists', function () {",
+              "  pm.expect(token, 'token/access_token').to.be.a('string').and.not.empty;",
+              "});",
+              "if (token) {",
+              "  pm.environment.set('sso_jwt', token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Create Member",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-IAE-KEY",
+            "value": "{{member_api_key}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Member {{unique_suffix}}\",\n  \"student_number\": \"SISWA-{{unique_suffix}}\",\n  \"email\": \"postman-{{unique_suffix}}@example.com\",\n  \"phone\": \"08123456789\",\n  \"address\": \"Jl. Postman No. 5\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/members",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "members"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create member returns 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Member creation success', function () {",
+              "  pm.expect(json.status).to.eql('success');",
+              "  pm.expect(json.data.id).to.exist;",
+              "  pm.expect(json.data.is_active).to.eql(true);",
+              "});",
+              "if (json.data?.id) {",
+              "  pm.environment.set('member_id', json.data.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Get Member Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-IAE-KEY",
+            "value": "{{member_api_key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/members/{{member_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "members", "{{member_id}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Get member returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Member is active', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.data.id.toString()).to.eql(pm.environment.get('member_id').toString());",
+              "  pm.expect(json.data.is_active).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Create Book",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sso_jwt}}"
+          },
+          {
+            "key": "X-IAE-KEY",
+            "value": "{{catalog_api_key}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman Book {{unique_suffix}}\",\n  \"author\": \"Kelompok 5\",\n  \"isbn\": \"ISBN-{{unique_suffix}}\",\n  \"publisher\": \"IAE Press\",\n  \"year\": 2026,\n  \"stock\": 3\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/books",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "books"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create book returns 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Book id exists', function () {",
+              "  pm.expect(json.data.id).to.exist;",
+              "});",
+              "if (json.data?.id) {",
+              "  pm.environment.set('book_id', json.data.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Get Book Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sso_jwt}}"
+          },
+          {
+            "key": "X-IAE-KEY",
+            "value": "{{catalog_api_key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/books/{{book_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "books", "{{book_id}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Get book returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Book has stock', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.data.available_stock).to.be.at.least(1);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Create Loan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sso_jwt}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"member_id\": {{member_id}},\n  \"book_id\": {{book_id}}\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "loans"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create loan returns 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "const loan = json.data?.loan || json.data;",
+              "pm.test('Loan id exists', function () {",
+              "  pm.expect(loan.id).to.exist;",
+              "});",
+              "pm.test('Loan validated member and book', function () {",
+              "  pm.expect(json.data.validated_member.is_active).to.eql(true);",
+              "  pm.expect(json.data.validated_book.available_stock_after).to.not.eql(null);",
+              "});",
+              "if (loan?.id) {",
+              "  pm.environment.set('loan_id', loan.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Get Loan Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sso_jwt}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/{{loan_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "loans", "{{loan_id}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Get loan returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Loan status active', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.data.status).to.eql('active');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Return Loan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sso_jwt}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/{{loan_id}}/return",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "loans", "{{loan_id}}", "return"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Return loan returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Loan returned and stock restored', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.data.loan.status).to.eql('returned');",
+              "  pm.expect(json.data.catalog_stock.available_stock).to.exist;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Gateway Root Routes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/",
+          "host": ["{{base_url}}"],
+          "path": [""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Gateway root returns route list', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.gateway).to.eql('tubes-iae-kelompok-5');",
+              "  pm.expect(json.routes).to.include('/api/v1/members');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

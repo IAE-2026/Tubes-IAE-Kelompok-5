@@ -52,3 +52,9 @@ Dokumen pendukung:
 - `docs/log-prompting-ai.md`
 - `docs/laporan-per-anggota.md`
 - `docs/test-report.md`
+- `docs/postman-test-report.md`
+
+Postman:
+
+- `postman/Tubes-IAE-Kelompok-5.postman_collection.json`
+- `postman/Tubes-IAE-Kelompok-5.postman_environment.json`
