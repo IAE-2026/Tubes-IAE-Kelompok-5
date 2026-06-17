@@ -52,6 +52,9 @@ return [
         '/graphql-playground' => [
             'name' => 'graphql-playground',
             'endpoint' => '/graphql',
+            'headers' => [
+                'X-IAE-KEY' => env('IAE_API_KEY', '102022400255'),
+            ],
             'subscription-endpoint' => env('GRAPHIQL_SUBSCRIPTION_ENDPOINT', null),
         ],
     ],

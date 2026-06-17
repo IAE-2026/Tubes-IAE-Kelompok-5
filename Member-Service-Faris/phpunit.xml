@@ -19,6 +19,10 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:OU7pg1SEOjPxvmA9meGixWH4vlyfZVZWlxFxgHepE00="/>
+        <env name="IAE_API_KEY" value="102022400255"/>
+        <env name="GRAPHIQL_ENABLED" value="true"/>
+        <env name="LIGHTHOUSE_SCHEMA_CACHE_ENABLE" value="false"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
