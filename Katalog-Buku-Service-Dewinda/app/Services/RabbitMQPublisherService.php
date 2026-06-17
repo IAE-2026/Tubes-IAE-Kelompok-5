@@ -6,22 +6,32 @@ use Illuminate\Support\Facades\Http;
 
 class RabbitMQPublisherService
 {
-    private string $baseUrl = 'https://iae-sso.virtualfri.id';
+    public function __construct()
+    {
+        $this->baseUrl = env('SSO_URL', 'https://iae-sso.virtualfri.id');
+    }
+
+    private string $baseUrl;
 
     public function publish(array $book, string $receiptNumber, string $jwtToken): void
     {
         $payload = [
-            'event'   => 'book.created',
-            'service' => 'catalog-service',
-            'nim'     => env('IAE_API_KEY', 'KEY-MHS-44'),
-            'data'    => [
-                'book_id'        => $book['id'],
-                'title'          => $book['title'],
-                'author'         => $book['author'],
-                'isbn'           => $book['isbn'],
-                'stock'          => $book['stock'],
-                'receipt_number' => $receiptNumber,
-                'timestamp'      => now()->toIso8601String(),
+            'exchange'    => 'iae.central.exchange',
+            'routing_key' => 'library.catalog.book.created',
+            'message'     => [
+                'event'   => 'library.catalog.book.created',
+                'service' => 'catalog-service',
+                'team_id' => env('IAE_TEAM_ID', 'TEAM-05'),
+                'nim'     => env('IAE_API_KEY', 'KEY-MHS-44'),
+                'data'    => [
+                    'book_id'        => $book['id'],
+                    'title'          => $book['title'],
+                    'author'         => $book['author'],
+                    'isbn'           => $book['isbn'],
+                    'stock'          => $book['stock'],
+                    'receipt_number' => $receiptNumber,
+                    'timestamp'      => now()->toIso8601String(),
+                ],
             ],
         ];
 

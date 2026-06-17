@@ -24,5 +24,6 @@ class Book extends Model
 
     protected $casts = [
         'stock'           => 'integer',
+        'available_stock' => 'integer',
     ];
 }
