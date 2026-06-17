@@ -6,7 +6,12 @@ use Illuminate\Support\Facades\Http;
 
 class SOAPAuditService
 {
-    private string $baseUrl = 'https://iae-sso.virtualfri.id';
+    private string $baseUrl;
+
+    public function __construct()
+    {
+        $this->baseUrl = rtrim(env('SSO_URL', 'https://iae-sso.virtualfri.id'), '/');
+    }
 
     public function sendAudit(array $book, string $jwtToken): string
     {

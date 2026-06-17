@@ -3,6 +3,9 @@
 !**/.env.example
 
 **/vendor/
+!Member-Service-Faris/resources/views/vendor/
+!Member-Service-Faris/resources/views/vendor/graphiql/
+!Member-Service-Faris/resources/views/vendor/graphiql/**
 **/node_modules/
 **/storage/logs/*.log
 **/storage/framework/cache/*

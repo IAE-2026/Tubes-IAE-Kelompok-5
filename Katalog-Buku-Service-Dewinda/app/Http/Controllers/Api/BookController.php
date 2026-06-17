@@ -141,4 +141,92 @@ class BookController extends Controller
             ],
         ], 201);
     }
+
+    /**
+     * POST /api/v1/books/{id}/stock/borrow
+     */
+    public function borrowStock(int $id): JsonResponse
+    {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => "Buku dengan ID {$id} tidak ditemukan.",
+                'errors'  => null,
+            ], 404);
+        }
+
+        if ((int) $book->available_stock < 1) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Stok buku tidak tersedia.',
+                'data'    => [
+                    'book_id'         => $book->id,
+                    'available_stock' => (int) $book->available_stock,
+                ],
+            ], 422);
+        }
+
+        $book->decrement('available_stock');
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Stok buku berhasil dikurangi untuk peminjaman.',
+            'data'    => [
+                'book_id'         => $book->id,
+                'available_stock' => (int) $book->fresh()->available_stock,
+            ],
+            'meta'    => [
+                'service_name' => 'catalog-service',
+                'api_version'  => 'v1',
+            ],
+        ], 200);
+    }
+
+    /**
+     * POST /api/v1/books/{id}/stock/return
+     */
+    public function returnStock(int $id): JsonResponse
+    {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => "Buku dengan ID {$id} tidak ditemukan.",
+                'errors'  => null,
+            ], 404);
+        }
+
+        if ((int) $book->available_stock >= (int) $book->stock) {
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Stok buku sudah penuh.',
+                'data'    => [
+                    'book_id'         => $book->id,
+                    'available_stock' => (int) $book->available_stock,
+                ],
+                'meta'    => [
+                    'service_name' => 'catalog-service',
+                    'api_version'  => 'v1',
+                ],
+            ], 200);
+        }
+
+        $book->increment('available_stock');
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Stok buku berhasil dikembalikan.',
+            'data'    => [
+                'book_id'         => $book->id,
+                'available_stock' => (int) $book->fresh()->available_stock,
+            ],
+            'meta'    => [
+                'service_name' => 'catalog-service',
+                'api_version'  => 'v1',
+            ],
+        ], 200);
+    }
 }

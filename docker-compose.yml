@@ -41,8 +41,8 @@ services:
       SESSION_DRIVER: file
       CACHE_STORE: file
       QUEUE_CONNECTION: sync
-    ports:
-      - "8001:8000"
+    expose:
+      - "8000"
     volumes:
       - ./Member-Service-Faris:/var/www/html
       - member_vendor:/var/www/html/vendor
@@ -58,8 +58,8 @@ services:
       MYSQL_DATABASE: tubes_iae_keanggotaan
       MYSQL_USER: iae_user
       MYSQL_PASSWORD: iae_password
-    ports:
-      - "3307:3306"
+    expose:
+      - "3306"
     volumes:
       - mysql_member_data:/var/lib/mysql
       - ./Member-Service-Faris/docker/mysql/init:/docker-entrypoint-initdb.d:ro
@@ -87,6 +87,12 @@ services:
       APP_DEBUG: "true"
       APP_URL: "http://localhost:8003"
       API_KEY: "102022400110"
+      TEAM_ID: "TEAM-05"
+      SSO_URL: "https://iae-sso.virtualfri.id"
+      MEMBER_SERVICE_URL: "http://member-service:8000"
+      MEMBER_SERVICE_API_KEY: "102022400255"
+      CATALOG_SERVICE_URL: "http://katalog-buku-service:8000"
+      CATALOG_SERVICE_API_KEY: "KEY-MHS-44"
       SESSION_DRIVER: file
       CACHE_STORE: file
       QUEUE_CONNECTION: sync
@@ -96,8 +102,8 @@ services:
       DB_DATABASE: peminjaman_service
       DB_USERNAME: laravel
       DB_PASSWORD: secret
-    ports:
-      - "8003:8000"
+    expose:
+      - "8000"
     volumes:
       - ./Peminjaman-Service-Amin:/var/www
       - peminjaman_vendor:/var/www/vendor
@@ -113,8 +119,8 @@ services:
       MYSQL_USER: laravel
       MYSQL_PASSWORD: secret
       MYSQL_ROOT_PASSWORD: rootsecret
-    ports:
-      - "3308:3306"
+    expose:
+      - "3306"
     volumes:
       - mysql_peminjaman_data:/var/lib/mysql
     healthcheck:
@@ -148,13 +154,14 @@ services:
       DB_PASSWORD: root
       IAE_API_KEY: "KEY-MHS-44"
       IAE_TEAM_ID: "TEAM-05"
+      SSO_URL: "https://iae-sso.virtualfri.id"
       SSO_EMAIL: "warga05@ktp.iae.id"
       SSO_PASSWORD: "KtpDigital2026!"
       SESSION_DRIVER: file
       CACHE_STORE: file
       QUEUE_CONNECTION: sync
-    ports:
-      - "8002:8000"
+    expose:
+      - "8000"
     volumes:
       - ./Katalog-Buku-Service-Dewinda:/var/www
       - katalog_vendor:/var/www/vendor
@@ -168,8 +175,8 @@ services:
     environment:
       MYSQL_DATABASE: katalog_buku
       MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3309:3306"
+    expose:
+      - "3306"
     volumes:
       - mysql_katalog_data:/var/lib/mysql
     healthcheck:

@@ -6,7 +6,12 @@ use Illuminate\Support\Facades\Http;
 
 class SSOService
 {
-    private string $baseUrl = 'https://iae-sso.virtualfri.id';
+    private string $baseUrl;
+
+    public function __construct()
+    {
+        $this->baseUrl = rtrim(env('SSO_URL', 'https://iae-sso.virtualfri.id'), '/');
+    }
 
     public function getToken(): string
     {
@@ -31,8 +36,8 @@ class SSOService
     public function getUserToken(): string
     {
         $response = Http::post("{$this->baseUrl}/api/v1/auth/token", [
-            'email'    => 'warga38@ktp.iae.id',
-            'password' => 'KtpDigital2026!',
+            'email'    => env('SSO_EMAIL', 'warga05@ktp.iae.id'),
+            'password' => env('SSO_PASSWORD', 'KtpDigital2026!'),
         ]);
 
         if ($response->failed()) {

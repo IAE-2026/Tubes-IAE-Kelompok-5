@@ -25,7 +25,13 @@ class JwtMiddleware
         try {
             // Ambil JWKS dari SSO Dosen, di-cache 1 jam
             $jwks = Cache::remember('sso_jwks', 3600, function () {
-                $response = Http::timeout(10)->get(env('SSO_URL') . '/.well-known/jwks.json');
+                $ssoUrl = rtrim(env('SSO_URL', 'https://iae-sso.virtualfri.id'), '/');
+                $response = Http::timeout(10)->get($ssoUrl . '/api/v1/auth/jwks');
+
+                if (!$response->successful()) {
+                    $response = Http::timeout(10)->get($ssoUrl . '/.well-known/jwks.json');
+                }
+
                 if (!$response->successful()) {
                     throw new \Exception('Failed to fetch JWKS from SSO');
                 }

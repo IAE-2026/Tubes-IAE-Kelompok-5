@@ -19,6 +19,14 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:TSpbPOJlerDCDNKMVPZkwE4w3uWc0nBp/fDMa3TRkYw="/>
+        <env name="API_KEY" value="102022400110"/>
+        <env name="TEAM_ID" value="TEAM-05"/>
+        <env name="SSO_URL" value="https://iae-sso.virtualfri.id"/>
+        <env name="MEMBER_SERVICE_URL" value="http://member-service:8000"/>
+        <env name="MEMBER_SERVICE_API_KEY" value="102022400255"/>
+        <env name="CATALOG_SERVICE_URL" value="http://katalog-buku-service:8000"/>
+        <env name="CATALOG_SERVICE_API_KEY" value="KEY-MHS-44"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>

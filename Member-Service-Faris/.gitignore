@@ -32,3 +32,6 @@ vendor/
 !public/vendor/
 !public/vendor/graphiql/
 !public/vendor/graphiql/**
+!resources/views/vendor/
+!resources/views/vendor/graphiql/
+!resources/views/vendor/graphiql/**
