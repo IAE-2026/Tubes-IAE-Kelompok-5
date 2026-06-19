@@ -253,25 +253,28 @@ class LoanController extends Controller
         ]);
 
         // SOAP Audit & AMQP Publisher integration (Tugas 3)
-        // Fetch M2M Bearer Token using the API_KEY and NIM
-        $m2mToken = \Illuminate\Support\Facades\Cache::remember('sso_m2m_token', 3000, function () {
+        $m2mToken = \Illuminate\Support\Facades\Cache::get('sso_m2m_token');
+        if (!$m2mToken) {
             try {
-                $response = \Illuminate\Support\Facades\Http::acceptJson()
+                $response = \Illuminate\Support\Facades\Http::asJson()
+                    ->acceptJson()
                     ->timeout(10)
                     ->post(env('SSO_URL', 'https://iae-sso.virtualfri.id') . '/api/v1/auth/token', [
                         'api_key' => env('API_KEY'),
                         'nim' => env('NIM'),
                     ]);
                 if ($response->successful()) {
-                    return $response->json('token') ?? $response->json('access_token');
+                    $m2mToken = $response->json('token') ?? $response->json('access_token');
+                    if ($m2mToken) {
+                        \Illuminate\Support\Facades\Cache::put('sso_m2m_token', $m2mToken, 3000);
+                    }
+                } else {
+                    \Illuminate\Support\Facades\Log::error('Failed to fetch M2M token: ' . $response->body());
                 }
-                \Illuminate\Support\Facades\Log::error('Failed to fetch M2M token: ' . $response->body());
-                return null;
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('Exception fetching M2M token: ' . $e->getMessage());
-                return null;
             }
-        });
+        }
 
         $auditData = [
             'loan_id' => $loan->id,

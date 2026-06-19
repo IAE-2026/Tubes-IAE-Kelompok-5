@@ -20,7 +20,7 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:TSpbPOJlerDCDNKMVPZkwE4w3uWc0nBp/fDMa3TRkYw="/>
-        <env name="API_KEY" value="102022400110"/>
+        <env name="API_KEY" value="KEY-MHS-122"/>
         <env name="NIM" value="102022400110"/>
         <env name="TEAM_ID" value="TEAM-05"/>
         <env name="SSO_URL" value="https://iae-sso.virtualfri.id"/>
