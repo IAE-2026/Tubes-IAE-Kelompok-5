@@ -48,6 +48,57 @@
       ]
     },
     {
+      "name": "01 M2M SSO Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"api_key\": \"{{m2m_api_key}}\",\n  \"nim\": \"{{m2m_nim}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/auth/token",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "auth", "token"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('SSO M2M token returns 2xx', function () {",
+              "  pm.expect(pm.response.code).to.be.within(200, 299);",
+              "});",
+              "const json = pm.response.json();",
+              "const token = json.token || json.access_token || json.data?.token || json.data?.access_token;",
+              "pm.test('SSO M2M token exists', function () {",
+              "  pm.expect(token, 'token/access_token').to.be.a('string').and.not.empty;",
+              "});",
+              "if (token) {",
+              "  pm.environment.set('sso_m2m_token', token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "01 Login SSO User",
       "request": {
         "method": "POST",

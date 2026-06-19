@@ -15,6 +15,7 @@ async function main() {
   const centralClient = new CentralClient({
     baseUrl: config.baseUrl,
     apiKey: config.apiKey,
+    nim: config.nim,
     teamId: config.teamId,
   });
 

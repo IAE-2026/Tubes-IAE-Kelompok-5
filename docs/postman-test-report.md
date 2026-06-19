@@ -24,7 +24,8 @@ Tanggal: 2026-06-17
 | Urutan | Request | Tujuan |
 | --- | --- | --- |
 | 00 | `GET /health` | Memastikan API Gateway hidup. |
-| 01 | `POST {{sso_url}}/api/v1/auth/token` | Mengambil JWT SSO dan menyimpan ke `sso_jwt`. |
+| 01 | `POST {{base_url}}/api/v1/auth/token` | Mengambil token M2M SSO dengan body `api_key` dan `nim`, lalu menyimpan ke `sso_m2m_token`. |
+| 01 Login | `POST {{sso_url}}/api/v1/auth/token` | Mengambil JWT SSO user dan menyimpan ke `sso_jwt`. |
 | 02 | `POST /api/v1/members` | Membuat member baru dan menyimpan `member_id`. |
 | 03 | `GET /api/v1/members/{{member_id}}` | Memastikan member aktif. |
 | 04 | `POST /api/v1/books` | Membuat buku baru dan menyimpan `book_id`. |
@@ -51,7 +52,7 @@ postman/Tubes-IAE-Kelompok-5.postman_environment.json
 ```
 
 4. Pilih environment `Tubes IAE Kelompok 5 - Local`.
-5. Jika request SSO login gagal karena format body berbeda, isi manual variable `sso_jwt` dengan JWT SSO yang valid.
+5. Jika request SSO user login gagal karena kredensial berubah, isi manual variable `sso_jwt` dengan JWT SSO yang valid.
 6. Klik `Run Collection`.
 
 ## Ekspektasi Hasil

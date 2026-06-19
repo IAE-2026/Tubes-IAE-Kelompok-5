@@ -21,6 +21,7 @@
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:fKd7F0+DPr8RZ+q1p63EO+Y7ZOZE/mcEknrBWQtSGY4="/>
         <env name="IAE_API_KEY" value="KEY-MHS-44"/>
+        <env name="SSO_NIM" value="102022430028"/>
         <env name="IAE_TEAM_ID" value="TEAM-05"/>
         <env name="SSO_URL" value="https://iae-sso.virtualfri.id"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>

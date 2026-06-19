@@ -15,9 +15,10 @@ class SSOService
 
     public function getToken(): string
     {
-        // M2M token via api_key (server SSO butuh format form-data)
-        $response = Http::asForm()->acceptJson()->post("{$this->baseUrl}/api/v1/auth/token", [
+        // M2M token via JSON api_key and nim for the current SSO contract.
+        $response = Http::asJson()->acceptJson()->post("{$this->baseUrl}/api/v1/auth/token", [
             'api_key' => env('IAE_API_KEY', 'KEY-MHS-44'),
+            'nim' => env('SSO_NIM', env('IAE_API_KEY', 'KEY-MHS-44')),
         ]);
 
         if ($response->failed()) {

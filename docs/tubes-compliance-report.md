@@ -8,7 +8,7 @@ Dokumen ini memetakan repository kelompok terhadap kontrak proses bisnis `Peminj
 | --- | --- | --- |
 | Repository gabungan | Terpenuhi | Tiga service individu digabung sebagai folder terpisah di root repository. |
 | Docker compose gabungan | Terpenuhi | `docker-compose.yml` menjalankan gateway, tiga service Laravel, dan tiga database. |
-| API Gateway & routing hub | Terpenuhi | `api-gateway/nginx.conf` mem-proxy `/api/v1/members`, `/api/v1/books`, dan `/api/v1/loans`. |
+| API Gateway & routing hub | Terpenuhi | `api-gateway/nginx.conf` mem-proxy `/api/v1/auth/token`, `/api/v1/members`, `/api/v1/books`, dan `/api/v1/loans`. |
 | Tidak bypass gateway dari host | Terpenuhi | Hanya `api-gateway` yang memiliki `ports`; service dan database internal hanya memakai `expose`. |
 | End-to-end core business flow | Terpenuhi secara kode | Peminjaman service memanggil member service dan catalog service secara internal sebelum loan dibuat. |
 | Central infrastructure compliance | Terpenuhi secara kode | Return loan menjalankan login SSO, SOAP audit, lalu RabbitMQ publish. Catalog create book juga menjalankan urutan SSO, SOAP, RabbitMQ. |
@@ -45,7 +45,15 @@ Semua request dari host harus lewat gateway `http://localhost:8080`.
 docker compose up --build
 ```
 
-2. Buat member:
+2. Ambil token M2M SSO:
+
+```bash
+curl -s -X POST http://localhost:8080/api/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"api_key":"102022400255","nim":"102022400255"}'
+```
+
+3. Buat member:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/members \
@@ -54,7 +62,7 @@ curl -X POST http://localhost:8080/api/v1/members \
   -d "{\"name\":\"Budi Santoso\",\"student_number\":\"SISWA-00001\",\"email\":\"budi@example.com\"}"
 ```
 
-3. Buat buku dengan Bearer JWT SSO dan API key katalog:
+4. Buat buku dengan Bearer JWT SSO dan API key katalog:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/books \
@@ -64,7 +72,7 @@ curl -X POST http://localhost:8080/api/v1/books \
   -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"isbn\":\"9780132350884\",\"publisher\":\"Prentice Hall\",\"year\":2008,\"stock\":3}"
 ```
 
-4. Buat loan:
+5. Buat loan:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/loans \
@@ -73,7 +81,7 @@ curl -X POST http://localhost:8080/api/v1/loans \
   -d "{\"member_id\":1,\"book_id\":1}"
 ```
 
-5. Return loan:
+6. Return loan:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/loans/1/return \

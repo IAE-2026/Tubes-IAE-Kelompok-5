@@ -87,6 +87,7 @@ services:
       APP_DEBUG: "true"
       APP_URL: "http://localhost:8003"
       API_KEY: "102022400110"
+      SSO_NIM: "102022400110"
       TEAM_ID: "TEAM-05"
       SSO_URL: "https://iae-sso.virtualfri.id"
       MEMBER_SERVICE_URL: "http://member-service:8000"
@@ -153,6 +154,7 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: root
       IAE_API_KEY: "KEY-MHS-44"
+      SSO_NIM: "102022430028"
       IAE_TEAM_ID: "TEAM-05"
       SSO_URL: "https://iae-sso.virtualfri.id"
       SSO_EMAIL: "warga05@ktp.iae.id"

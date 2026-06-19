@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
+  CentralClient,
   buildSoapEnvelope,
   parseReceiptNumber,
   parseSoapStatus,
@@ -34,6 +35,33 @@ test('parseReceiptNumber extracts receipt from SOAP response', () => {
 
   assert.equal(parseSoapStatus(xml), 'SUCCESS');
   assert.equal(parseReceiptNumber(xml), 'IAE-LOG-2026-8891A7BC');
+});
+
+test('tokenWithApiKey sends api_key and nim in JSON body', async () => {
+  const client = new CentralClient({
+    baseUrl: 'https://iae-sso.virtualfri.id',
+    apiKey: '102022400255',
+    nim: '102022400255',
+    teamId: 'TEAM-38',
+    fetchImpl: async (url, options) => {
+      assert.equal(url, 'https://iae-sso.virtualfri.id/api/v1/auth/token');
+      assert.equal(options.method, 'POST');
+      assert.equal(options.headers['content-type'], 'application/json');
+      assert.deepEqual(JSON.parse(options.body), {
+        api_key: '102022400255',
+        nim: '102022400255',
+      });
+
+      return new Response(JSON.stringify({ token: 'm2m-token' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    },
+  });
+
+  const token = await client.tokenWithApiKey();
+
+  assert.equal(token.token, 'm2m-token');
 });
 
 test('buildPermitPaymentEvent includes receipt, actor, and routing event', () => {

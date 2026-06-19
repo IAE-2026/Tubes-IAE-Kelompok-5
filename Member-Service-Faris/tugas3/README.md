@@ -41,6 +41,7 @@ Required values:
 IAE_BASE_URL=https://iae-sso.virtualfri.id
 IAE_TEAM_ID=TEAM-38
 IAE_API_KEY=replace-with-api-key
+IAE_NIM=102022400255
 IAE_CITIZEN_EMAIL=warga38@ktp.iae.id
 IAE_CITIZEN_PASSWORD=replace-with-password
 PORT=3000

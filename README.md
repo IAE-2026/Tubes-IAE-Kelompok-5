@@ -29,9 +29,18 @@ docker compose up --build
 
 Gateway tersedia di:
 
+- `http://localhost:8080/api/v1/auth/token`
 - `http://localhost:8080/api/v1/members`
 - `http://localhost:8080/api/v1/books`
 - `http://localhost:8080/api/v1/loans`
+
+Token M2M SSO lewat gateway memakai JSON body `api_key` dan `nim`:
+
+```bash
+curl -s -X POST http://localhost:8080/api/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"api_key":"102022400255","nim":"102022400255"}'
+```
 
 Service internal tidak dipublish ke host agar akses dari luar harus melewati API Gateway. Di dalam jaringan Docker:
 
