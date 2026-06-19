@@ -43,7 +43,7 @@ class SOAPAuditService
             'isbn'      => $book['isbn'],
             'stock'     => $book['stock'],
             'timestamp' => now()->toIso8601String(),
-            'nim'       => env('NIM', '102022430028'),
+            'nim'       => env('IAE_NIM', '102022430028'),
         ]);
 
         $teamId = env('IAE_TEAM_ID', 'TEAM-05');
