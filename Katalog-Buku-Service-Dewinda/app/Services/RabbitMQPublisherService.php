@@ -22,7 +22,7 @@ class RabbitMQPublisherService
                 'event'   => 'library.catalog.book.created',
                 'service' => 'catalog-service',
                 'team_id' => env('IAE_TEAM_ID', 'TEAM-05'),
-                'nim'     => env('IAE_API_KEY', 'KEY-MHS-44'),
+                'nim'     => env('NIM', '102022430028'),
                 'data'    => [
                     'book_id'        => $book['id'],
                     'title'          => $book['title'],

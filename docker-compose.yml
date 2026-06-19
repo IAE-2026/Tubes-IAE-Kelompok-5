@@ -158,6 +158,7 @@ services:
       APP_DEBUG: "true"
       APP_URL: "http://katalog-buku-service:8000"
       IAE_API_KEY: "KEY-MHS-44"
+      NIM: "102022430028"
       IAE_TEAM_ID: "TEAM-05"
       SSO_URL: "https://iae-sso.virtualfri.id"
       SSO_EMAIL: "warga05@ktp.iae.id"
