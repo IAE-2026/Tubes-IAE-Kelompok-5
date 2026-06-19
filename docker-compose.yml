@@ -92,7 +92,8 @@ services:
       APP_KEY: "base64:TSpbPOJlerDCDNKMVPZkwE4w3uWc0nBp/fDMa3TRkYw="
       APP_DEBUG: "true"
       APP_URL: "http://peminjaman-service:8000"
-      API_KEY: "102022400110"
+      API_KEY: "KEY-MHS-122"
+      NIM: "102022400110"
       TEAM_ID: "TEAM-05"
       SSO_URL: "https://iae-sso.virtualfri.id"
       MEMBER_SERVICE_URL: "http://member-service:8000"
@@ -158,9 +159,10 @@ services:
       APP_DEBUG: "true"
       APP_URL: "http://katalog-buku-service:8000"
       IAE_API_KEY: "KEY-MHS-44"
+      IAE_NIM: "102022430028"
       IAE_TEAM_ID: "TEAM-05"
       SSO_URL: "https://iae-sso.virtualfri.id"
-      SSO_EMAIL: "warga05@ktp.iae.id"
+      SSO_EMAIL: "warga26@ktp.iae.id"
       SSO_PASSWORD: "KtpDigital2026!"
       DB_CONNECTION: mysql
       DB_HOST: mysql-katalog
