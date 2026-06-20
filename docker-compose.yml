@@ -94,6 +94,7 @@ services:
       APP_URL: "http://peminjaman-service:8000"
       API_KEY: "KEY-MHS-122"
       NIM: "102022400110"
+      SSO_NIM: "102022400110"
       TEAM_ID: "TEAM-05"
       SSO_URL: "https://iae-sso.virtualfri.id"
       MEMBER_SERVICE_URL: "http://member-service:8000"

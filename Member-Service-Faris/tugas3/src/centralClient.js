@@ -60,6 +60,7 @@ class CentralClient {
   constructor(options) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');
     this.apiKey = options.apiKey;
+    this.nim = options.nim || options.apiKey;
     this.teamId = options.teamId;
     this.fetchImpl = options.fetchImpl || fetch;
     this.jwksCacheMs = options.jwksCacheMs || 5 * 60 * 1000;
@@ -83,11 +84,14 @@ class CentralClient {
     if (!this.apiKey) {
       throw new AppError('IAE_API_KEY is not configured', 500);
     }
+    if (!this.nim) {
+      throw new AppError('IAE_NIM is not configured', 500);
+    }
 
     const response = await this.fetchImpl(this.url(TOKEN_PATH), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ api_key: this.apiKey }),
+      body: JSON.stringify({ api_key: this.apiKey, nim: this.nim }),
     });
     const parsed = await parseResponse(response);
     if (!response.ok || !parsed.data?.token) {

@@ -201,6 +201,7 @@ function createContext(config = getConfig()) {
   const centralClient = new CentralClient({
     baseUrl: config.baseUrl,
     apiKey: config.apiKey,
+    nim: config.nim,
     teamId: config.teamId,
   });
   const paymentService = new PaymentService({

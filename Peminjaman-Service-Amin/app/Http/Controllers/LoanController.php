@@ -261,7 +261,7 @@ class LoanController extends Controller
                     ->timeout(10)
                     ->post(env('SSO_URL', 'https://iae-sso.virtualfri.id') . '/api/v1/auth/token', [
                         'api_key' => env('API_KEY'),
-                        'nim' => env('NIM'),
+                        'nim' => env('SSO_NIM', env('NIM')),
                     ]);
                 if ($response->successful()) {
                     $m2mToken = $response->json('token') ?? $response->json('access_token');

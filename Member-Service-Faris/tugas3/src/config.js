@@ -45,6 +45,7 @@ function getConfig(overrides = {}) {
     baseUrl: baseUrl.replace(/\/+$/, ''),
     teamId: overrides.teamId || process.env.IAE_TEAM_ID || 'TEAM-38',
     apiKey: overrides.apiKey || process.env.IAE_API_KEY || '',
+    nim: overrides.nim || process.env.IAE_NIM || process.env.SSO_NIM || '',
     citizenEmail:
       overrides.citizenEmail || process.env.IAE_CITIZEN_EMAIL || 'warga38@ktp.iae.id',
     citizenPassword: overrides.citizenPassword || process.env.IAE_CITIZEN_PASSWORD || '',
@@ -56,6 +57,7 @@ function getConfig(overrides = {}) {
 function requireConfigured(config) {
   const missing = [];
   if (!config.apiKey) missing.push('IAE_API_KEY');
+  if (!config.nim) missing.push('IAE_NIM');
   if (!config.citizenPassword) missing.push('IAE_CITIZEN_PASSWORD');
   if (missing.length) {
     throw new Error(`Missing required environment values: ${missing.join(', ')}`);
